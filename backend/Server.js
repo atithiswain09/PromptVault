@@ -1,11 +1,32 @@
-const express = require('express')
-const app = express()
-const port = 3000
+const { ENV } = require("./src/configs/env");
+const { log, error } = require("console");
 
-app.get('/', (req, res) => {
-  res.send('Hello World!')
-})
+const { createServer } = require("http");
+const { default: connectDB } = require("./src/database");
 
-app.listen(port, () => {
-  console.log(`Server Port is Running on_${port}`)
-})
+async function main() {
+  const app = require("./src/app");
+  const server = createServer(app);
+  const PORT = ENV.PORT;
+
+  const DBConnection = await connectDB();
+
+  server.listen(PORT, () => log("server is running on port: ", PORT));
+
+  const shutdown = async () => {
+    log("graceful shutdown initiated");
+
+    DBConnection?.close();
+
+    server.close(() => log("HTTP server closed"));
+    process.exit(0);
+  };
+
+  process.on("SIGINT", shutdown);
+  process.on("SIGTERM", shutdown);
+}
+
+main().catch((err) => {
+  error("Startup error", err);
+  process.exit(1);
+});
