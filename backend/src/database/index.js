@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const { ENV } = require("../configs/env");
+const ENV = require("../configs/env");
 
 const MAX_RETRIES = 5;
 const RETRY_DELAY_MS = 2000;
@@ -33,4 +33,4 @@ async function connectDB(retries = MAX_RETRIES) {
   }
 }
 
-export default connectDB;
+module.exports = connectDB;

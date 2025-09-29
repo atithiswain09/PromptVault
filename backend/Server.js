@@ -2,7 +2,7 @@ const { ENV } = require("./src/configs/env");
 const { log, error } = require("console");
 
 const { createServer } = require("http");
-const { default: connectDB } = require("./src/database");
+const connectDB = require("./src/database");
 
 async function main() {
   const app = require("./src/app");
