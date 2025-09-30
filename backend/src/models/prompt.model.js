@@ -1,4 +1,4 @@
-const mongoose=require("mongoose");
+const mongoose = require("mongoose");
 
 const promptSchema = new mongoose.Schema(
   {
@@ -6,6 +6,7 @@ const promptSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
+      index: true,
     },
 
     content: {
@@ -20,10 +21,10 @@ const promptSchema = new mongoose.Schema(
       },
     ],
 
+    // To implement custom categories without any restriction
     category: {
-      type: String,
-      enum: ["marketing", "study", "code", "creative", "other"],
-      default: "other",
+      type: [String],
+      default: [],
     },
 
     vaultType: {
@@ -38,10 +39,23 @@ const promptSchema = new mongoose.Schema(
       required: true,
     },
 
-    ratings: [
+    // To track up votes in count as number
+    upvotes: {
+      type: Number,
+      default: 0,
+    },
+
+    // To track down votes in count as number
+    downvotes: {
+      type: Number,
+      default: 0,
+    },
+
+    // Optional: To track individual voters and prevent multiple votes
+    votedBy: [
       {
-        user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-        value: { type: Number, enum: [1, -1] }, // upvote = 1, downvote = -1
+        userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+        voteType: { type: String, enum: ["upvote", "downvote"] },
       },
     ],
 
@@ -56,6 +70,6 @@ const promptSchema = new mongoose.Schema(
 );
 
 // MongoModule
-const  promptModel=mongoose.model("Prompt",prompt);
+const promptModel = mongoose.model("Prompt", prompt);
 
-module.exports=promptModel;
+module.exports = promptModel;
