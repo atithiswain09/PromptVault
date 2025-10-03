@@ -1,10 +1,13 @@
-const User = require("../models/User.modul");
+const User = require("../models/user.model");
 const bcrypt = require("bcryptjs");
+const { validationResult } = require("express-validator");
 const jwt = require("jsonwebtoken");
 const { ENV } = require("../configs/env");
 
 // Signup (Register)
 const signup = async (req, res) => {
+  inputValidation(req, res)
+
   try {
     const { username, email, password } = req.body;
 
@@ -42,6 +45,7 @@ const signup = async (req, res) => {
 
 // Login
 const login = async (req, res) => {
+  inputValidation(req, res)
   try {
     const { email, password } = req.body;
 
@@ -69,5 +73,12 @@ const login = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+function inputValidation(req, res) {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+}
 
 module.exports = { signup, login };
