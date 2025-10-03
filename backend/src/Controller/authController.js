@@ -1,6 +1,7 @@
-const User = require("../models/User"); 
+const User = require("../models/User.modul");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const { ENV } = require("../configs/env");
 
 // Signup (Register)
 const signup = async (req, res) => {
@@ -9,7 +10,8 @@ const signup = async (req, res) => {
 
     // check user exists
     const userExist = await User.findOne({ email });
-    if (userExist) return res.status(400).json({ message: "User already exists" });
+    if (userExist)
+      return res.status(400).json({ message: "User already exists" });
 
     // hash password
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -22,7 +24,7 @@ const signup = async (req, res) => {
     });
 
     // generate token
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+    const token = jwt.sign({ id: user._id }, ENV.JWT_SECRET, {
       expiresIn: "7d",
     });
 
@@ -32,7 +34,9 @@ const signup = async (req, res) => {
       user: { id: user._id, username: user.username, email: user.email },
     });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res
+      .status(500)
+      .json({ message: err.message, metadata: [process.env.JWT_SECRET] });
   }
 };
 
@@ -43,11 +47,13 @@ const login = async (req, res) => {
 
     // find user
     const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ message: "Invalid email or password" });
+    if (!user)
+      return res.status(400).json({ message: "Invalid email or password" });
 
     // match password
     const match = await bcrypt.compare(password, user.password);
-    if (!match) return res.status(400).json({ message: "Invalid email or password" });
+    if (!match)
+      return res.status(400).json({ message: "Invalid email or password" });
 
     // generate token
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
@@ -63,7 +69,5 @@ const login = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
-
-
 
 module.exports = { signup, login };
