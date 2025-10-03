@@ -2,6 +2,7 @@ const User = require("../models/user.model");
 const bcrypt = require("bcryptjs");
 const { validationResult } = require("express-validator");
 const jwt = require("jsonwebtoken");
+const { ENV } = require("../configs/env");
 
 // Signup (Register)
 const signup = async (req, res) => {
@@ -26,7 +27,7 @@ const signup = async (req, res) => {
     });
 
     // generate token
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+    const token = jwt.sign({ id: user._id }, ENV.JWT_SECRET, {
       expiresIn: "7d",
     });
 
@@ -36,7 +37,9 @@ const signup = async (req, res) => {
       user: { id: user._id, username: user.username, email: user.email },
     });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res
+      .status(500)
+      .json({ message: err.message, metadata: [process.env.JWT_SECRET] });
   }
 };
 
