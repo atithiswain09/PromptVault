@@ -38,7 +38,7 @@ const signup = async (req, res) => {
     // store token inside cookie
     res.cookie("token", token, {
       httpOnly: true, // security → prevents JS from accessing cookie
-      secure: process.env.NODE_ENV === "production", // true only in production (https)
+      // true only in production (https)
       sameSite: "strict", // CSRF protection
       maxAge: 7 * 24 * 60 * 60 * 1000, // cookie expiry → 7 days
     });
