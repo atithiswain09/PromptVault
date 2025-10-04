@@ -1,10 +1,10 @@
 const User = require("../models/user.model");
 const bcrypt = require("bcryptjs");
-;
+const { validationResult } = require("express-validator");
 const jwt = require("jsonwebtoken");
 const { ENV } = require("../configs/env");
 
-// Signup (Register) ====================>
+//Signup (Register) ===============>
 const signup = async (req, res) => {
   // validate inputs
   if (inputValidation(req, res)) return;
@@ -38,7 +38,7 @@ const signup = async (req, res) => {
     // store token inside cookie
     res.cookie("token", token, {
       httpOnly: true, // security → prevents JS from accessing cookie
-      // true only in production (https)
+      secure: process.env.NODE_ENV === "production", // true only in production (https)
       sameSite: "strict", // CSRF protection
       maxAge: 7 * 24 * 60 * 60 * 1000, // cookie expiry → 7 days
     });
@@ -78,6 +78,7 @@ const login = async (req, res) => {
     // store token inside cookie
     res.cookie("token", token, {
       httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
@@ -92,6 +93,14 @@ const login = async (req, res) => {
   }
 };
 
-
+// Input Validation Helper ====================>
+function inputValidation(req, res) {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.status(400).json({ errors: errors.array() });
+    return errors;
+  }
+  return null;
+}
 
 module.exports = { signup, login };
