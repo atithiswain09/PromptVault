@@ -1,41 +1,51 @@
 const User = require("../models/user.model");
 const bcrypt = require("bcryptjs");
-const { validationResult } = require("express-validator");
+;
 const jwt = require("jsonwebtoken");
 const { ENV } = require("../configs/env");
 
-// Signup (Register)
+// Signup (Register) ====================>
 const signup = async (req, res) => {
+  // validate inputs
   if (inputValidation(req, res)) return;
 
   try {
     const { username, email, password } = req.body;
 
-    // check user exists
+    // check if user already exists
     const userExist = await User.findOne({ email });
-    if (userExist)
+    if (userExist) {
       return res.status(409).json({
         errors: [{ path: "email", msg: "User already exists" }],
       });
+    }
 
-    // hash password
+    // hash password before saving
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // create new user
+    // create new user in database
     const user = await User.create({
       username,
       email,
       password: hashedPassword,
     });
 
-    // generate token
+    // create JWT token (valid for 7 days)
     const token = jwt.sign({ id: user._id }, ENV.JWT_SECRET, {
       expiresIn: "7d",
     });
 
+    // store token inside cookie
+    res.cookie("token", token, {
+      httpOnly: true, // security → prevents JS from accessing cookie
+      secure: process.env.NODE_ENV === "production", // true only in production (https)
+      sameSite: "strict", // CSRF protection
+      maxAge: 7 * 24 * 60 * 60 * 1000, // cookie expiry → 7 days
+    });
+
+    // success response
     return res.status(201).json({
       message: "Signup successful",
-      token,
       user: { id: user._id, username: user.username, email: user.email },
     });
   } catch (err) {
@@ -43,30 +53,38 @@ const signup = async (req, res) => {
   }
 };
 
-// Login
+//  Login ====================>
 const login = async (req, res) => {
-  inputValidation(req, res);
+  if (inputValidation(req, res)) return;
+
   try {
     const { email, password } = req.body;
 
-    // find user
+    // find user by email
     const user = await User.findOne({ email });
     if (!user)
       return res.status(400).json({ message: "Invalid email or password" });
 
-    // match password
+    // compare entered password with hashed one
     const match = await bcrypt.compare(password, user.password);
     if (!match)
       return res.status(400).json({ message: "Invalid email or password" });
 
-    // generate token
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      // expiresIn: "7d",
+    // generate JWT token
+    const token = jwt.sign({ id: user._id }, ENV.JWT_SECRET, {
+      expiresIn: "7d",
     });
 
+    // store token inside cookie
+    res.cookie("token", token, {
+      httpOnly: true,
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    // success response
     res.status(200).json({
       message: "Login successful",
-      token,
       user: { id: user._id, username: user.username, email: user.email },
     });
   } catch (err) {
@@ -74,13 +92,6 @@ const login = async (req, res) => {
   }
 };
 
-function inputValidation(req, res) {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    res.status(400).json({ errors: errors.array() });
-    return errors;
-  }
-  return null;
-}
+
 
 module.exports = { signup, login };
