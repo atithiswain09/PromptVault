@@ -3,6 +3,7 @@ const authRouter = require("./routers/auth.routes");
 const AppError = require("./utils/AppError");
 const { globalErrorHandler } = require("./middlewares/errorHandler");
 const app = express();
+const promptRouter=require('./routers/prompt.routes');
 
 app.use(express.json());
 
@@ -11,6 +12,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/v1/auth", authRouter);
+app.use("/prompt", promptRouter);
 
 // Handle unfounded routes (404)
 app.all("/*path", (req, res, next) => {
