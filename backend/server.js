@@ -4,29 +4,17 @@ const { log, error } = require("console");
 const { createServer } = require("http");
 const connectDB = require("./src/database");
 
+// A function which handles all main server operations
 async function main() {
-  const app = require("./src/app");
-  const server = createServer(app);
+  const app = require("./src/app"); // imports app as express server
+  const server = createServer(app); // creates http server
   const PORT = ENV.PORT;
 
-  const DBConnection = await connectDB();
-
-  server.listen(PORT, () => log("server is running on port: ", PORT));
-
-  const shutdown = async () => {
-    log("graceful shutdown initiated");
-
-    DBConnection?.close();
-
-    server.close(() => log("HTTP server closed"));
-    process.exit(0);
-  };
-
-  process.on("SIGINT", shutdown);
-  process.on("SIGTERM", shutdown);
+  await connectDB(); // creates connection to database
+  server.listen(PORT, () => log("server is running on port: ", PORT)); 
 }
 
 main().catch((err) => {
   error("Startup error", err);
-  process.exit(1);
+  process.exit(1); // exits process, if server got error
 });
