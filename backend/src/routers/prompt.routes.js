@@ -3,9 +3,6 @@ const {createPrompt}=require('../controllers/prompt.controller');
 
 const router = Router();
 
-router.post("/createPrompts", (req, res, next) => {
-  
-  next();
-},createPrompt);
+router.post("/createPrompts",createPrompt);
 
 module.exports = router;

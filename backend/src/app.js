@@ -11,7 +11,7 @@ app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 
-app.use("/api/v1/auth", authRouter);
+app.use("/api/auth", authRouter);
 app.use("/prompt", promptRouter);
 
 // Handle unfounded routes (404)
