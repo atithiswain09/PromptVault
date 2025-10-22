@@ -7,12 +7,11 @@ const promptRouter=require('./routers/prompt.routes');
 
 app.use(express.json());
 
-app.get("/", (req, res) => {
-  res.send("Hello World!");
-});
 
+
+
+app.use("/api/prompts", promptRouter);
 app.use("/api/auth", authRouter);
-app.use("/prompt", promptRouter);
 
 // Handle unfounded routes (404)
 app.all("/*path", (req, res, next) => {

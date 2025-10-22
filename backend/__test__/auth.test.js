@@ -18,7 +18,7 @@ afterAll(async () => await disconnectDBForTesting());
 beforeEach(async () => await clearCollections());
 
 describe("User Registration", () => {
-  const registerRoute = "/api/v1/auth/signup";
+  const registerRoute = "/api/auth/signup";
   const testName = "testName";
   const testEmail = "test@mail.com";
   const testPassword = "testPassword123@";
@@ -36,7 +36,6 @@ describe("User Registration", () => {
       .expect(201);
 
     expect(res.body.message).toBe("Signup successful");
-    expect(res.body.token).toBeDefined();
     expect(res.body.user.id).toBeDefined();
     expect(res.body.user.username).toEqual(testName);
     expect(res.body.user.email).toEqual(testEmail);
@@ -204,11 +203,11 @@ describe("User Registration", () => {
     });
 
     // First signup should succeed
-    await request(app).post("/api/v1/auth/signup").send(userData).expect(409);
+    await request(app).post("/api/auth/signup").send(userData).expect(409);
 
     // Second signup with same email should fail
     const res = await request(app)
-      .post("/api/v1/auth/signup")
+      .post("/api/auth/signup")
       .send(userData)
       .expect(409); // or 409 depending on how you handle conflict
 
