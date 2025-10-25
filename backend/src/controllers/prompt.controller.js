@@ -35,43 +35,53 @@ const listPrompt = async (req, res) => {
 const updatePrompt = async (req, res) => {
   try {
     const { title, content } = req.body;
-    console.log(title, content);
-    const UserId = req.user.id;
-    const promptId = req.params.id;
+    const userId = req.user.id;
+    if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
-    // First we Find the User by Given Id
-    const TrueUser = await PromptModel.findById(promptId);
-    if (!TrueUser) {
-      return res.status(404).json({ message: "Prompt Creater is Not Found" });
+    const promptId = req.params.id;
+    const prompt = await PromptModel.findById(promptId); 
+    if (!prompt) {
+      return res.status(404).json({ message: "Prompt not found" });
     }
-    if (prompt.owner.toString() !== UserId) {
-      return res
-        .status(403)
-        .json({ message: "You are not authorized to update this prompt" });
+    if (prompt.owner.toString() !== userId) {
+      return res.status(403).json({ message: "You are not authorized to update this prompt" });
     }
-     if (title) prompt.title = title;
+
+    if (title) prompt.title = title;
     if (content) prompt.content = content;
 
+    await prompt.save();
     return res.status(200).json({
-        message:"Prompt updated successfully",prompt
-    })
+      message: "Prompt updated successfully",
+      prompt,
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Update failed", error: err.message || err });
+  }
+}
+const deletePrompt = async (req, res) => {
+  try {
+    const promptId=req.params.id;
+    const userId=req.user.id;//the user Own Id 
+    if (!userId) return res.status(401).json({ message: "Unauthorized" });
+    // useing prompt id we need to find  the user 
+    // const prompt=await PromptModel.findById(promptId);
+    const prompt = await PromptModel.findById(promptId);
+    if (!prompt) return res.status(404).json({ message: "Prompt Not Found!!" });
 
+    if (!prompt.owner || prompt.owner.toString() !== userId) {
+      return res.status(403).json({ message: "You are not authorized to delete this prompt" });
+    }
+
+    await prompt.deleteOne(); // perform the deletion
+    return res.status(200).json({ message: "Prompt deleted successfully" });
   } catch (err) {
     console.err(err);
-    return res
-      .status(500)
-      .json({ message: "UpdatePrompt Not Succesfully Complited" });
+    return res.status(500).json({
+      message: "Ohh no Prompt is Not DeletedSuccesFully!!",
+    });
   }
 };
 
-// const deletePrompt = async (req, res) => {
-//   try {
-//   } catch (err) {
-//     console.err(err);
-//     return res.status(500).json({
-//       message: "Ohh no Prompt is Not DeletedSuccesFully!!",
-//     });
-//   }
-// };
-
-module.exports = { createPrompt, listPrompt,updatePrompt };
+module.exports = { createPrompt, listPrompt,updatePrompt,deletePrompt};
