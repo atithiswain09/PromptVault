@@ -93,17 +93,16 @@ const login = async (req, res) => {
   }
 };
 
- const logout = (req, res) => {
-  res.clearCookie('token', {
+const logout = (req, res) => {
+  res.clearCookie("token", {
     httpOnly: true,
     sameSite: "strict",
     secure: process.env.NODE_ENV === "production",
   });
-  return res.status(200).json({ message: 'Logged out successfully, cookie cleared.' });
+  return res
+    .status(200)
+    .json({ message: "Logged out successfully, cookie cleared." });
 };
-
-
-
 
 // Input Validation Helper ====================>
 function inputValidation(req, res) {
