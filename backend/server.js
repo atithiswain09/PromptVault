@@ -11,7 +11,7 @@ async function main() {
   const PORT = ENV.PORT;
 
   await connectDB(); // creates connection to database
-  server.listen(PORT, () => log("server is running on port: ", PORT)); 
+  server.listen(PORT, () => log("server is running on port:", PORT));
 }
 
 main().catch((err) => {

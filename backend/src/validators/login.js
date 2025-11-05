@@ -4,8 +4,12 @@ const loginValidator = [
   body("email")
     .trim()
     .notEmpty()
-    .withMessage("Email is required"),
+    .withMessage("Email is required")
+    .bail()
+    .isEmail()
+    .withMessage("Invalid email format")
+    .normalizeEmail(),
   body("password").notEmpty().withMessage("Password is required"),
 ];
 
-module.exports = { loginValidator }
+module.exports = { loginValidator };
