@@ -11,7 +11,7 @@ const promptSchema = new mongoose.Schema(
 
     content: {
       type: String,
-      required: true,
+      // required: true,
     },
 
     tags: [
@@ -70,6 +70,6 @@ const promptSchema = new mongoose.Schema(
 );
 
 // MongoModule
-const promptModel = mongoose.model("Prompt", prompt);
+const promptModel = mongoose.model("Prompt", promptSchema);
 
 module.exports = promptModel;
